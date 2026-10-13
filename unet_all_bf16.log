@@ -1,0 +1,104 @@
+{
+  "python": "3.12.7",
+  "cpu": "Intel(R) Xeon(R) 6952P",
+  "cpu_affinity": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "affinity_logical_cpus": 8,
+  "taskset_binding": {
+    "enabled": false,
+    "start_cpu": null,
+    "physical_core_count": null,
+    "logical_cpu_list": null
+  },
+  "load_average": [
+    1.34,
+    1.22,
+    0.76
+  ],
+  "recommended_threads": 8,
+  "amx_flags": [
+    "amx_bf16",
+    "amx_int8",
+    "amx_tile"
+  ],
+  "packages": {
+    "torch": "2.14.0+cpu",
+    "numpy": "2.5.3",
+    "pillow": "12.3.0",
+    "openvino": "2026.3.1"
+  },
+  "image_dir": "/home/sgui/unet/test_images",
+  "image_count": 10,
+  "images": [
+    "/home/sgui/unet/test_images/adas_coco_000000000094_urban_road.jpg",
+    "/home/sgui/unet/test_images/adas_coco_000000000260_night_bus.jpg",
+    "/home/sgui/unet/test_images/adas_coco_000000000359_lowlight_traffic_light.jpg",
+    "/home/sgui/unet/test_images/adas_coco_000000000532_bus_pedestrians.jpg",
+    "/home/sgui/unet/test_images/adas_coco_000000000540_airport_roads.jpg",
+    "/home/sgui/unet/test_images/adas_coco_bike.jpg",
+    "/home/sgui/unet/test_images/adas_huggingface_car.jpg",
+    "/home/sgui/unet/test_images/adas_mapillary_empty_road.jpg",
+    "/home/sgui/unet/test_images/adas_openvino_license_plate.png",
+    "/home/sgui/unet/test_images/adas_ultralytics_bus.jpg"
+  ],
+  "models": [
+    {
+      "variant": "scale0.5",
+      "scale": 0.5,
+      "checkpoint": "/home/sgui/unet/UNet-models/unet_carvana_scale0.5_epoch2.pth",
+      "checkpoint_exists": true,
+      "openvino_xml": "/home/sgui/unet/models_ov/unet_carvana_scale0_5_epoch2/unet_carvana_scale0.5_epoch2.xml",
+      "openvino_exists": true,
+      "openvino_all_xml": "/home/sgui/unet/models_ov/unet_carvana_scale0_5_epoch2/unet_carvana_scale0.5_epoch2_all.xml",
+      "openvino_all_exists": true
+    },
+    {
+      "variant": "scale1.0",
+      "scale": 1.0,
+      "checkpoint": "/home/sgui/unet/UNet-models/unet_carvana_scale1.0_epoch2.pth",
+      "checkpoint_exists": true,
+      "openvino_xml": "/home/sgui/unet/models_ov/unet_carvana_scale1_0_epoch2/unet_carvana_scale1.0_epoch2.xml",
+      "openvino_exists": true,
+      "openvino_all_xml": "/home/sgui/unet/models_ov/unet_carvana_scale1_0_epoch2/unet_carvana_scale1.0_epoch2_all.xml",
+      "openvino_all_exists": true
+    }
+  ]
+}
+Using 8 inference threads
+
+[scale0.5 / unet_carvana_scale0.5_epoch2]
+checkpoint setup=0.159s, mask_values=[0, 1]
+  [images] count=10
+
+[scale1.0 / unet_carvana_scale1.0_epoch2]
+checkpoint setup=0.128s, mask_values=[0, 1]
+  [images] count=10
+variant   image           backend   path  compute  mean ms   FPS    AMX  NRMSE      mask agree
+--------  --------------  --------  ----  -------  --------  -----  ---  ---------  ----------
+scale0.5  ALL_IMAGES(10)  pytorch   core  FP32     2120.304  4.72   -    -          -         
+scale0.5  ALL_IMAGES(10)  openvino  core  FP32     1556.676  6.42   -    5.2e-07    1.000000  
+scale0.5  ALL_IMAGES(10)  pytorch   core  BF16     1059.695  9.44   -    0.0286665  0.994029  
+scale0.5  ALL_IMAGES(10)  openvino  core  BF16     257.417   38.85  yes  0.0345183  0.992518  
+scale1.0  ALL_IMAGES(10)  pytorch   core  FP32     8634.277  1.16   -    -          -         
+scale1.0  ALL_IMAGES(10)  openvino  core  FP32     6176.140  1.62   -    1.17e-06   1.000000  
+scale1.0  ALL_IMAGES(10)  pytorch   core  BF16     4492.749  2.23   -    0.123702   0.979713  
+scale1.0  ALL_IMAGES(10)  openvino  core  BF16     983.776   10.16  yes  0.0289614  0.994833  
+
+Same-model PyTorch vs OpenVINO
+variant   image           compute  path  Torch ms  OV ms     speedup  NRMSE      mask agree  fg IoU  
+--------  --------------  -------  ----  --------  --------  -------  ---------  ----------  --------
+scale0.5  ALL_IMAGES(10)  FP32     core  2120.304  1556.676  1.36x    5.2e-07    1.000000    1.000000
+scale0.5  ALL_IMAGES(10)  BF16     core  1059.695  257.417   4.12x    0.0345183  0.992518    0.990604
+scale1.0  ALL_IMAGES(10)  FP32     core  8634.277  6176.140  1.40x    1.17e-06   1.000000    1.000000
+scale1.0  ALL_IMAGES(10)  BF16     core  4492.749  983.776   4.57x    0.0289614  0.994833    0.993929
+JSON report: /home/sgui/unet/results/benchmark_20261010_100820.json
+CSV report:  /home/sgui/unet/results/benchmark_20261010_100820.csv
+Failure CSV: /home/sgui/unet/results/benchmark_failures_20261010_100820.csv
