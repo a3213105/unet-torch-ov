@@ -1,0 +1,6 @@
+__pycache__/
+results/
+*.log
+*.pth
+*.bin
+*.bin.bak

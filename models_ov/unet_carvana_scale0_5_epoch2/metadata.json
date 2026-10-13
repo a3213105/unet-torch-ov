@@ -1,0 +1,11 @@
+{
+  "model": "unet_carvana_scale0.5_epoch2",
+  "task": "binary semantic segmentation",
+  "dataset": "Carvana",
+  "checkpoint": "/home/sgui/Didi/2026/models/UNet-models/unet_carvana_scale0.5_epoch2.pth",
+  "scale": 0.5,
+  "classes": 2,
+  "core_ir": "unet_carvana_scale0.5_epoch2.xml",
+  "end_to_end_ir": "unet_carvana_scale0.5_epoch2_all.xml",
+  "compress_to_fp16": false
+}
