@@ -26,7 +26,7 @@ python -m pip install \
 python -m pip install \
     numpy==1.26.4 \
     pillow \
-    openvino==2026.4.0 \
+    openvino==2026.3.1 \
     "setuptools==80.10.2"
 
 python - <<'PY'
