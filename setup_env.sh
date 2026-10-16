@@ -2,4 +2,4 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-exec "$SCRIPT_DIR/../setup_benchmark_env.sh"
+exec "$SCRIPT_DIR/setup_benchmark_env.sh"

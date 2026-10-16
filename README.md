@@ -16,46 +16,53 @@
 
 ## 安装
 
-建议复用上级目录 `/home/sgui/2026` 的共享环境脚本：
+使用仓库内最小依赖安装脚本：
 
 ```bash
-cd /home/sgui/unet
-bash /home/sgui/2026/setup_benchmark_env.sh
+cd /home/sgui/unet-torch-ov
+bash setup_benchmark_env.sh
 ```
 
-说明：仓库内的 `setup_env.sh` 会调用 `../setup_benchmark_env.sh`。仅当当前目录结构本身就是 `/home/sgui/2026/unet` 时，直接执行 `./setup_env.sh` 才会成功。
+也可以直接执行：
+
+```bash
+cd /home/sgui/unet-torch-ov
+bash setup_env.sh
+```
+
+默认 conda 环境名为 `torch_ov`（可通过环境变量 `BENCHMARK_CONDA_ENV` 覆盖）。
 
 ## 运行
 
 默认测试 `test_images/` 下全部 10 张 ADAS 图片、两个 scale 和三种精度：
 
 ```bash
-conda run -n didi_t213 python unet_benchmark.py \
-  --model-dir /home/sgui/unet/UNet-models \
-  --openvino-dir /home/sgui/unet/models_ov \
-  --image-dir /home/sgui/unet/test_images
+conda run -n torch_ov python unet_benchmark.py \
+  --model-dir /home/sgui/unet-torch-ov/UNet-models \
+  --openvino-dir /home/sgui/unet-torch-ov/models_ov \
+  --image-dir /home/sgui/unet-torch-ov/test_images
 ```
 
 只做配置和文件完整性检查（不跑性能循环）：
 
 ```bash
-conda run -n didi_t213 python unet_benchmark.py --check-only \
-  --model-dir /home/sgui/unet/UNet-models \
-  --openvino-dir /home/sgui/unet/models_ov \
-  --image-dir /home/sgui/unet/test_images
+conda run -n torch_ov python unet_benchmark.py --check-only \
+  --model-dir /home/sgui/unet-torch-ov/UNet-models \
+  --openvino-dir /home/sgui/unet-torch-ov/models_ov \
+  --image-dir /home/sgui/unet-torch-ov/test_images
 ```
 
 指定图片、变体和精度：
 
 ```bash
-conda run -n didi_t213 python unet_benchmark.py \
+conda run -n torch_ov python unet_benchmark.py \
   --variants scale0.5 scale1.0 \
-  --images /home/sgui/unet/test_images/adas_coco_bike.jpg \
+  --images /home/sgui/unet-torch-ov/test_images/adas_coco_bike.jpg \
   --precisions FP32 BF16 FP16 \
   --warmup 3 --iterations 10 \
-  --model-dir /home/sgui/unet/UNet-models \
-  --openvino-dir /home/sgui/unet/models_ov \
-  --image-dir /home/sgui/unet/test_images
+  --model-dir /home/sgui/unet-torch-ov/UNet-models \
+  --openvino-dir /home/sgui/unet-torch-ov/models_ov \
+  --image-dir /home/sgui/unet-torch-ov/test_images
 ```
 
 ## 可配置路径
