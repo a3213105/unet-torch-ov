@@ -8184,10 +8184,10 @@ checkpoint setup=0.160s, mask_values=[0, 1]
 [scale1.0 / unet_carvana_scale1.0_epoch2]
 checkpoint setup=0.132s, mask_values=[0, 1]
   [images] count=10
-variant   image           backend  path  compute  mean ms   FPS   AMX  NRMSE  mask agree
---------  --------------  -------  ----  -------  --------  ----  ---  -----  ----------
-scale0.5  ALL_IMAGES(10)  pytorch  core  BF16     1078.084  9.28  -    -      -         
-scale1.0  ALL_IMAGES(10)  pytorch  core  BF16     4513.859  2.22  -    -      -         
+variant  image  backend  path  compute  mean ms  FPS  NRMSE  mask agree
+--------  --------------  -------  ----  -------  --------  ----  -----  ----------
+scale0.5  ALL_IMAGES(10)  pytorch  core  BF16  1078.084  9.28  -  -  
+scale1.0  ALL_IMAGES(10)  pytorch  core  BF16  4513.859  2.22  -  -  
 JSON report: /home/sgui/unet/results/benchmark_20261010_100719.json
 CSV report:  /home/sgui/unet/results/benchmark_20261010_100719.csv
 Failure CSV: /home/sgui/unet/results/benchmark_failures_20261010_100719.csv

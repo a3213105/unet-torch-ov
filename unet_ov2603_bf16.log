@@ -2188,10 +2188,10 @@ onednn_verbose,v1,primitive,exec,cpu,reorder,jit:uni,undef,src:bf16::blocked:acd
 
 [scale1.0 / unet_carvana_scale1.0_epoch2]
   [images] count=10
-variant   image           backend   path  compute  mean ms  FPS    AMX  NRMSE  mask agree
---------  --------------  --------  ----  -------  -------  -----  ---  -----  ----------
-scale0.5  ALL_IMAGES(10)  openvino  core  BF16     261.638  38.22  yes  -      -         
-scale1.0  ALL_IMAGES(10)  openvino  core  BF16     996.477  10.04  yes  -      -         
+variant  image  backend  path  compute  mean ms  FPS  NRMSE  mask agree
+--------  --------------  --------  ----  -------  -------  -----  -----  ----------
+scale0.5  ALL_IMAGES(10)  openvino  core  BF16  261.638  38.22  -  -  
+scale1.0  ALL_IMAGES(10)  openvino  core  BF16  996.477  10.04  -  -  
 JSON report: /home/sgui/unet/results/benchmark_20261010_100723.json
 CSV report:  /home/sgui/unet/results/benchmark_20261010_100723.csv
 Failure CSV: /home/sgui/unet/results/benchmark_failures_20261010_100723.csv

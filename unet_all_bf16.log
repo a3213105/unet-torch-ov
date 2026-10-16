@@ -81,16 +81,16 @@ checkpoint setup=0.159s, mask_values=[0, 1]
 [scale1.0 / unet_carvana_scale1.0_epoch2]
 checkpoint setup=0.128s, mask_values=[0, 1]
   [images] count=10
-variant   image           backend   path  compute  mean ms   FPS    AMX  NRMSE      mask agree
---------  --------------  --------  ----  -------  --------  -----  ---  ---------  ----------
-scale0.5  ALL_IMAGES(10)  pytorch   core  FP32     2120.304  4.72   -    -          -         
-scale0.5  ALL_IMAGES(10)  openvino  core  FP32     1556.676  6.42   -    5.2e-07    1.000000  
-scale0.5  ALL_IMAGES(10)  pytorch   core  BF16     1059.695  9.44   -    0.0286665  0.994029  
-scale0.5  ALL_IMAGES(10)  openvino  core  BF16     257.417   38.85  yes  0.0345183  0.992518  
-scale1.0  ALL_IMAGES(10)  pytorch   core  FP32     8634.277  1.16   -    -          -         
-scale1.0  ALL_IMAGES(10)  openvino  core  FP32     6176.140  1.62   -    1.17e-06   1.000000  
-scale1.0  ALL_IMAGES(10)  pytorch   core  BF16     4492.749  2.23   -    0.123702   0.979713  
-scale1.0  ALL_IMAGES(10)  openvino  core  BF16     983.776   10.16  yes  0.0289614  0.994833  
+variant  image  backend  path  compute  mean ms  FPS  NRMSE  mask agree
+--------  --------------  --------  ----  -------  --------  -----  ---------  ----------
+scale0.5  ALL_IMAGES(10)  pytorch  core  FP32  2120.304  4.72  -  -  
+scale0.5  ALL_IMAGES(10)  openvino  core  FP32  1556.676  6.42  5.2e-07  1.000000  
+scale0.5  ALL_IMAGES(10)  pytorch  core  BF16  1059.695  9.44  0.0286665  0.994029  
+scale0.5  ALL_IMAGES(10)  openvino  core  BF16  257.417  38.85  0.0345183  0.992518  
+scale1.0  ALL_IMAGES(10)  pytorch  core  FP32  8634.277  1.16  -  -  
+scale1.0  ALL_IMAGES(10)  openvino  core  FP32  6176.140  1.62  1.17e-06  1.000000  
+scale1.0  ALL_IMAGES(10)  pytorch  core  BF16  4492.749  2.23  0.123702  0.979713  
+scale1.0  ALL_IMAGES(10)  openvino  core  BF16  983.776  10.16  0.0289614  0.994833  
 
 Same-model PyTorch vs OpenVINO
 variant   image           compute  path  Torch ms  OV ms     speedup  NRMSE      mask agree  fg IoU  

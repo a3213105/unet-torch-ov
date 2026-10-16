@@ -706,11 +706,10 @@ def print_results(results: Sequence[dict[str, Any]]) -> None:
         rows.append((
             result["variant"], Path(result["image"]).name, result["backend"], result["path"], result["precision"],
             f'{result["mean_ms"]:.3f}', f'{result["throughput_fps"]:.2f}',
-            "yes" if result.get("amx_profiled") else "-",
             f'{difference.get("normalized_rmse"):.6g}' if difference.get("normalized_rmse") is not None else "-",
             f'{mask.get("pixel_agreement"):.6f}' if mask.get("pixel_agreement") is not None else "-",
         ))
-    print_table(("variant", "image", "backend", "path", "compute", "mean ms", "FPS", "AMX", "NRMSE", "mask agree"), rows)
+    print_table(("variant", "image", "backend", "path", "compute", "mean ms", "FPS", "NRMSE", "mask agree"), rows)
 
 
 def print_comparisons(results: Sequence[dict[str, Any]]) -> None:
