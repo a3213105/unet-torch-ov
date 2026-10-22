@@ -14,6 +14,7 @@ import platform
 import statistics
 import time
 import traceback
+from contextlib import ExitStack
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -199,11 +200,33 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--skip-all", default=True, action="store_true", help="Skip end-to-end resize and argmax paths.")
     parser.add_argument("--check-only", action="store_true")
     parser.add_argument("--skip-pytorch", action="store_true", help="Skip PyTorch benchmark paths.")
+    parser.add_argument(
+        "--mode",
+        choices=("eager", "compile", "openvino"),
+        help="Run only the selected backend. Defaults to compile plus OpenVINO.",
+    )
+    parser.add_argument(
+        "--torch-compile",
+        type=int,
+        choices=(0, 1),
+        default=None,
+        help="Legacy PyTorch selector: Inductor (1) or eager (0).",
+    )
     parser.add_argument("--skip-ov", action="store_true", help="Skip OpenVINO benchmark paths.")
 
     args = parser.parse_args()
 
     args.skip_all = True
+    if args.mode is not None:
+        if args.torch_compile is not None:
+            parser.error("--mode cannot be combined with --torch-compile")
+        if args.skip_pytorch or args.skip_ov:
+            parser.error("--mode cannot be combined with --skip-pytorch or --skip-ov")
+        args.skip_pytorch = args.mode == "openvino"
+        args.skip_ov = args.mode != "openvino"
+        args.torch_compile = int(args.mode == "compile")
+    elif args.torch_compile is None:
+        args.torch_compile = 1
     if args.skip_pytorch and args.skip_ov:
         parser.error("--skip-pytorch and --skip-ov cannot both be set")
     if args.batch_size < 1 or args.warmup < 0 or args.iterations < 1 or args.threads < 0:
@@ -593,9 +616,9 @@ def benchmark_dataset(
 
                 def torch_core_single(single_input: Any) -> Any:
                     if cast_dtype is None:
-                        return model_torch(single_input)
+                        return opt_model(single_input)
                     with torch.autocast(device_type="cpu", dtype=cast_dtype):
-                        return model_torch(single_input)
+                        return opt_model(single_input)
 
                 def torch_core() -> Any:
                     last_logits = None
@@ -610,10 +633,43 @@ def benchmark_dataset(
                         last_mask = functional.interpolate(logits, item["original_shape"], mode="bilinear").argmax(dim=1)
                     return last_mask
 
-                with torch.inference_mode(), torch.no_grad():
+                with torch.inference_mode(), ExitStack() as compile_context:
+                    compile_error = ""
+                    opt_model = model_torch
+                    compile_start = time.perf_counter()
+                    if args.torch_compile == 1:
+                        try:
+                            import torch._inductor.config as inductor_cfg
+
+                            # Dynamo must also see freezing during every trace.
+                            compile_context.enter_context(inductor_cfg.patch({
+                                "freezing": True,
+                                "cpp.weight_prepack": True,
+                            }))
+                            opt_model = torch.compile(
+                                model_torch.eval(),
+                                backend="inductor",
+                            )
+                            torch_core()
+                        except Exception as error:
+                            compile_context.close()
+                            compile_error = f"{type(error).__name__}: {error}"
+                            print(f"[WARN] {spec.variant} {precision} compile failed; falling back to eager: {compile_error}", flush=True)
+                            opt_model = model_torch
+                    compile_seconds = time.perf_counter() - compile_start if args.torch_compile else 0.0
+                    if compile_error:
+                        torch_core()
+                    compiled = args.torch_compile == 1 and not compile_error
+                    compile_metadata = {
+                        "torch_compile_backend": "inductor" if compiled else "eager",
+                        "torch_inductor_freezing": compiled,
+                        "torch_inductor_weight_prepack": compiled,
+                        "torch_compile_error": compile_error,
+                        "torch_compile_seconds": round(compile_seconds, 4),
+                    }
                     core_latencies = timed_iterations(torch_core, warmup, iterations)
                     torch_logits = torch_core_single(first["input_tensor"]).detach().float().numpy().copy()
-                    results.append(summarize(spec, image_label, "pytorch", "core", precision, args, threads, core_latencies, samples_per_iteration, output_shape=list(torch_logits.shape)))
+                    results.append(summarize(spec, image_label, "pytorch", "core", precision, args, threads, core_latencies, samples_per_iteration, output_shape=list(torch_logits.shape), **compile_metadata))
                     store_output("pytorch", "core", precision, len(results) - 1, logits=torch_logits)
                     torch_mask = functional.interpolate(
                         torch_core_single(first["input_tensor"]),
@@ -622,7 +678,7 @@ def benchmark_dataset(
                     ).argmax(dim=1).detach().cpu().numpy().copy()
                     if not args.skip_all:
                         all_latencies = timed_iterations(torch_all, warmup, iterations)
-                        results.append(summarize(spec, image_label, "pytorch", "all", precision, args, threads, all_latencies, samples_per_iteration, output_shape=list(torch_mask.shape)))
+                        results.append(summarize(spec, image_label, "pytorch", "all", precision, args, threads, all_latencies, samples_per_iteration, output_shape=list(torch_mask.shape), **compile_metadata))
                         store_output("pytorch", "all", precision, len(results) - 1, mask=torch_mask)
 
             if args.skip_ov:
